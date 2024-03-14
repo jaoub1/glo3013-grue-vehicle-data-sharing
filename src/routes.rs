@@ -16,9 +16,9 @@ pub struct GrueRequest {
 pub struct TeamId(u8);
 
 impl TeamId {
-    pub const MIN_ID: u8 = 0;
-    pub const MAX_ID: u8 = 14;
-    pub const DEFAULT_NUMBER_OF_GRUE: usize = 6;
+    pub const MIN_ID: u8 = 1;
+    pub const MAX_ID: u8 = 6;
+    pub const DEFAULT_NUMBER_OF_GRUE: usize = Self::MAX_ID as usize;
 }
 
 impl Serialize for TeamId {
@@ -93,8 +93,8 @@ mod tests {
     use super::*;
 
     const VALID_GRUE_ID: u8 = 1;
-    const INVALID_GRUE_ID: u8 = 42;
-    const VALID_NUMBER_OF_MERCHANDISE: u8 = 3;
+    const INVALID_GRUE_ID: u8 = TeamId::MAX_ID + 1;
+    const ANY_NUMBER_OF_MERCHANDISE: u8 = 3;
 
     fn given_test_server() -> TestServer {
         TestServer::new_with_config(
@@ -112,7 +112,7 @@ mod tests {
         let server = given_test_server();
         let body = json!({
             "grue_id": VALID_GRUE_ID,
-            "number_of_merchandise": VALID_NUMBER_OF_MERCHANDISE
+            "number_of_merchandise": ANY_NUMBER_OF_MERCHANDISE
         });
 
         let response = server.post(GRUE_PATH).json(&body).await;
@@ -125,7 +125,7 @@ mod tests {
         let server = given_test_server();
         let body = json!({
             "grue_id": INVALID_GRUE_ID,
-            "number_of_merchandise": VALID_NUMBER_OF_MERCHANDISE
+            "number_of_merchandise": ANY_NUMBER_OF_MERCHANDISE
         });
 
         let response = server.post(GRUE_PATH).json(&body).expect_failure().await;
@@ -138,7 +138,7 @@ mod tests {
         let server = given_test_server();
         let body = GrueRequest {
             grue_id: VALID_GRUE_ID,
-            number_of_merchandise: VALID_NUMBER_OF_MERCHANDISE,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
         };
 
         let _ = server.post(GRUE_PATH).json(&body).await;
