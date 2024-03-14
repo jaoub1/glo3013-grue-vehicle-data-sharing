@@ -9,7 +9,7 @@ Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l
 ## Start and Execute
 ### Docker
 ```sh
-$ docker-compose up;
+$ docker-compose up
 ```
 
 >Note: You must have [Docker installed](https://docs.docker.com/engine/install/) first.
