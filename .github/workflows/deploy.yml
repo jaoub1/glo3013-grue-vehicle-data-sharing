@@ -38,3 +38,4 @@ jobs:
         environment_name: glo-3013-env
         version_label: app-7aaa-240314_165749968911
         region: ca-central-1
+        deployment_package: deploy.zip
