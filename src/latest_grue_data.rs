@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::routes::TeamId;
+use crate::team_id::TeamId;
 
 #[derive(Clone, Serialize, Debug)]
 pub struct LatestGrueData(HashMap<TeamId, u8>);

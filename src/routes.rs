@@ -1,10 +1,10 @@
-use std::{fmt::Display, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::anyhow;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::{latest_grue_data::LatestGrueData, setup::AppState};
+use crate::{latest_grue_data::LatestGrueData, setup::AppState, team_id::TeamId};
 
 #[derive(Deserialize, Serialize)]
 pub struct GrueRequest {
@@ -12,50 +12,16 @@ pub struct GrueRequest {
     pub number_of_merchandise: u8,
 }
 
-#[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct TeamId(u8);
-
-impl TeamId {
-    pub const MIN_ID: u8 = 1;
-    pub const MAX_ID: u8 = 6;
-    pub const DEFAULT_NUMBER_OF_GRUE: usize = Self::MAX_ID as usize;
-}
-
-impl Serialize for TeamId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&format!("team{}", self.0))
-    }
-}
-
-impl Display for TeamId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "team{}", self.0)
-    }
-}
-
-impl TryFrom<u8> for TeamId {
-    type Error = anyhow::Error;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        if (Self::MIN_ID..=Self::MAX_ID).contains(&value) {
-            Ok(Self(value))
-        } else {
-            Err(anyhow!(
-                "Error: A TeamId 'team_id' field must be between {} and {}",
-                Self::MIN_ID,
-                Self::MAX_ID
-            ))
-        }
-    }
-}
-
 #[derive(Serialize, Debug)]
 pub struct VehicleResponse {
     #[allow(dead_code)]
     vehicle_data: LatestGrueData,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ResetRequest {
+    #[allow(dead_code)]
+    uuid: Uuid,
 }
 
 pub async fn post_grue_data(
@@ -80,13 +46,24 @@ pub async fn get_vehicle_data(State(app): State<Arc<AppState>>) -> Json<VehicleR
     })
 }
 
+pub async fn reset(
+    State(app): State<Arc<AppState>>,
+    Json(request): Json<ResetRequest>,
+) -> impl IntoResponse {
+    match app.reset_uuid(request.uuid).await {
+        Ok(uuid) => Json(uuid).into_response(),
+        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use axum_test::{TestServer, TestServerConfig};
     use serde_json::json;
+    use uuid::uuid;
 
     use crate::{
-        constants::{GRUE_PATH, VEHICLE_PATH},
+        constants::{GRUE_PATH, RESET_PATH, VEHICLE_PATH},
         setup,
     };
 
@@ -95,10 +72,11 @@ mod tests {
     const VALID_GRUE_ID: u8 = 1;
     const INVALID_GRUE_ID: u8 = TeamId::MAX_ID + 1;
     const ANY_NUMBER_OF_MERCHANDISE: u8 = 3;
+    const ANY_UUID: Uuid = uuid!("bb3b9185-f6a8-49eb-b5de-9fb50ff441e4");
 
-    fn given_test_server() -> TestServer {
+    fn given_test_server(maybe_uuid: Option<Uuid>) -> TestServer {
         TestServer::new_with_config(
-            setup::generate_router(),
+            setup::generate_router(maybe_uuid),
             TestServerConfig::builder()
                 .expect_success_by_default()
                 .save_cookies()
@@ -109,7 +87,7 @@ mod tests {
 
     #[tokio::test]
     async fn given_valid_grue_request_when_post_grue_data_then_ok() {
-        let server = given_test_server();
+        let server = given_test_server(None);
         let body = json!({
             "grue_id": VALID_GRUE_ID,
             "number_of_merchandise": ANY_NUMBER_OF_MERCHANDISE
@@ -122,7 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn given_invalid_grue_request_when_post_grue_data_then_bad_request() {
-        let server = given_test_server();
+        let server = given_test_server(None);
         let body = json!({
             "grue_id": INVALID_GRUE_ID,
             "number_of_merchandise": ANY_NUMBER_OF_MERCHANDISE
@@ -135,7 +113,7 @@ mod tests {
 
     #[tokio::test]
     async fn given_some_grue_data_when_get_vehicle_data_then_ok_with_data() {
-        let server = given_test_server();
+        let server = given_test_server(None);
         let body = GrueRequest {
             grue_id: VALID_GRUE_ID,
             number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
@@ -146,6 +124,83 @@ mod tests {
 
         response.assert_status(StatusCode::OK);
         response.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 3,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+    }
+
+    #[tokio::test]
+    async fn given_uuid_when_post_reset_then_ok_with_default() {
+        let server = given_test_server(Some(ANY_UUID));
+        let body_grue = GrueRequest {
+            grue_id: VALID_GRUE_ID,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
+        };
+        let body_reset = ResetRequest { uuid: ANY_UUID };
+
+        let _ = server.post(GRUE_PATH).json(&body_grue).await;
+        let response1 = server.get(VEHICLE_PATH).await;
+        let _ = server.post(RESET_PATH).json(&body_reset).await;
+        let response2 = server.get(VEHICLE_PATH).await;
+
+        response1.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 3,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+        response2.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 0,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+    }
+
+    #[tokio::test]
+    async fn given_no_uuid_when_post_reset_then_err() {
+        let server = given_test_server(None);
+        let body_grue = GrueRequest {
+            grue_id: VALID_GRUE_ID,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
+        };
+        let body_reset = ResetRequest { uuid: ANY_UUID };
+
+        let _ = server.post(GRUE_PATH).json(&body_grue).await;
+        let response1 = server.get(VEHICLE_PATH).await;
+        let response2 = server
+            .post(RESET_PATH)
+            .json(&body_reset)
+            .expect_failure()
+            .await;
+        let response3 = server.get(VEHICLE_PATH).await;
+
+        response2.assert_status(StatusCode::BAD_REQUEST);
+        response1.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 3,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+        response3.assert_json(&json!({
             "vehicle_data" : {
                 "team1": 3,
                 "team2": 0,

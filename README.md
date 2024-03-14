@@ -42,7 +42,9 @@ $ cargo doc --open # Open offline documentation
 - Response:
     - **200** OK
     - **400** BAD_REQUEST\
-        String: (team number invalid)
+        String: (team number invalid, invalid JSON)
+    - **422** UNPROCESSABLE ENTITY
+        String: (invalid type, missing field)
 
 ### GET /vehicle
 - Response:
@@ -59,6 +61,14 @@ $ cargo doc --open # Open offline documentation
         }
     }
     ```
+
+### POST /reset
+- Response:
+    -  200 OK
+    -  400 BAD_REQUEST\
+        String ()
+
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
 

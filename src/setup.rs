@@ -1,5 +1,6 @@
-use std::sync::Arc;
+use std::{mem::swap, sync::Arc};
 
+use anyhow::anyhow;
 use axum::{
     extract::MatchedPath,
     http::Request,
@@ -11,24 +12,43 @@ use tower_http::{
     cors::{Any, CorsLayer},
     trace::{DefaultOnFailure, DefaultOnResponse, TraceLayer},
 };
-use tracing::{info, info_span, Level};
+use tracing::{info_span, Level};
+use uuid::Uuid;
 
 use crate::{
-    constants::{GRUE_PATH, VEHICLE_PATH},
+    constants::{GRUE_PATH, RESET_PATH, VEHICLE_PATH},
     latest_grue_data::LatestGrueData,
     routes,
 };
 
-#[derive(Default)]
 pub struct AppState {
     pub latest_grue_data: RwLock<LatestGrueData>,
+    pub lock_uuid: Option<RwLock<Uuid>>,
+}
+
+impl AppState {
+    pub async fn reset_uuid(&self, uuid: Uuid) -> anyhow::Result<()> {
+        match &self.lock_uuid {
+            Some(lock_uuid) => {
+                if uuid == *lock_uuid.read().await {
+                    let mut lock = self.latest_grue_data.write().await;
+
+                    swap(&mut *lock, &mut LatestGrueData::default());
+
+                    Ok(())
+                } else {
+                    Err(anyhow!("Error: The UUID supplied does not match the UUID supplied at server start."))
+                }
+            }
+            None => Err(anyhow!(
+                "Error: No reset allowed. No UUID supplied when the server started."
+            )),
+        }
+    }
 }
 
 /// Setup the Axum Server with routing
-pub fn generate_router() -> Router {
-    info!("Hello World !");
-
-    // Creating app state and router
+pub fn generate_router(maybe_uuid: Option<Uuid>) -> Router {
     let cors = CorsLayer::new()
         .allow_headers(Any)
         .allow_methods(Any)
@@ -38,8 +58,12 @@ pub fn generate_router() -> Router {
         Router::new()
             .route(GRUE_PATH, post(routes::post_grue_data))
             .route(VEHICLE_PATH, get(routes::get_vehicle_data))
+            .route(RESET_PATH, post(routes::reset))
             .layer(cors)
-            .with_state(Arc::new(AppState::default())),
+            .with_state(Arc::new(AppState {
+                latest_grue_data: Default::default(),
+                lock_uuid: maybe_uuid.map(RwLock::new),
+            })),
     )
 }
 
