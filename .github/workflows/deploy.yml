@@ -1,0 +1,19 @@
+on: 
+ push:
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the files
+      uses: actions/checkout@v3
+
+    - id: deploy
+      uses: bitovi/github-actions-deploy-docker-to-ec2@v1.0.1
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_default_region: ca-central-1
+          aws_elb_app_port: 8080 
