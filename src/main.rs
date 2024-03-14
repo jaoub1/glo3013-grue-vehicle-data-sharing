@@ -1,10 +1,22 @@
-use std::net::SocketAddr;
+use std::net::{Ipv4Addr, SocketAddr};
 
 use anyhow::Context;
 use axum::Router;
 use axum_prototype::setup::generate_router;
+use clap::Parser;
 use tokio::net::TcpListener;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Address of the TCP connection
+    #[arg(short, long, default_value_t = [0; 4].into())]
+    address: Ipv4Addr,
+    /// TCP port number
+    #[arg(short, long, default_value_t = 8080)]
+    port: u16,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -18,13 +30,12 @@ async fn main() -> anyhow::Result<()> {
         .context("Failed setuping the logging system")?;
 
     let custom_server = generate_router();
+    let args = Args::parse();
 
-    let addr = ([127, 0, 0, 1], 8080);
-
-    run(custom_server, addr).await
+    run(custom_server, (args.address, args.port)).await
 }
 
-async fn run(router: Router, addr: ([u8; 4], u16)) -> anyhow::Result<()> {
+async fn run(router: Router, addr: (Ipv4Addr, u16)) -> anyhow::Result<()> {
     let address = SocketAddr::from(addr);
     let listener = TcpListener::bind(&address)
         .await
