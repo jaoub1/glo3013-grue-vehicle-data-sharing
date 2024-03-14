@@ -12,15 +12,21 @@ Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l
 $ docker-compose up;
 ```
 
->Note: You must have [Docker installed](https://docs.docker.com/engine/install/) first
+>Note: You must have [Docker installed](https://docs.docker.com/engine/install/) first.
 
 
 ### CLI
 ```sh
 $ cargo run --release -- --address 127.0.0.1 --port 8081
+
+# Other useful commands
+$ cargo test       # Run tests
+$ cargo lint       # Lint all code
+$ cargo fmt        # Format all code
+$ cargo doc --open # Open offline documentation
 ```
 
-> Note: You must have [Rust installed](https://www.rust-lang.org/tools/install) first
+> Note: You must have [Rust installed](https://www.rust-lang.org/tools/install) first.
 
 
 
