@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2024 Momentum Electronics
+Copyright (c) 2024 DIII Equipe 7 and 10
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
