@@ -63,12 +63,18 @@ $ cargo doc --open # Open offline documentation
     ```
 
 ### POST /reset
+- Body:
+    ```json
+    {
+        "uuid": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+    }
+    ```
 - Response:
     -  200 OK
     -  400 BAD_REQUEST\
-        String ()
-
-FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        String (invalid uuid, reset not allowed)
+    - **422** UNPROCESSABLE ENTITY
+        String: (invalid type, missing field)
 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
 
