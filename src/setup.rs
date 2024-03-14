@@ -13,7 +13,11 @@ use tower_http::{
 };
 use tracing::{info, info_span, Level};
 
-use crate::{constants::{GRUE_PATH, VEHICLE_PATH}, latest_grue_data::LatestGrueData, routes};
+use crate::{
+    constants::{GRUE_PATH, VEHICLE_PATH},
+    latest_grue_data::LatestGrueData,
+    routes,
+};
 
 #[derive(Default)]
 pub struct AppState {
