@@ -1,23 +1,10 @@
-# syntax=docker/dockerfile:1
-
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
-ARG RUST_VERSION=1.75.0
-ARG APP_NAME=axum_prototype
-
 ################################################################################
 # xx is a helper for cross-compilation.
 # See https://github.com/tonistiigi/xx/ for more information.
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.3.0 AS xx
 
-################################################################################
-# Create a stage for building the application.
-FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-alpine AS build
-ARG APP_NAME
+FROM --platform=$BUILDPLATFORM rust:1.75.0-alpine AS build
+
 WORKDIR /app
 
 # Copy cross compilation utilities from the xx stage.
@@ -48,7 +35,7 @@ RUN --mount=type=bind,source=src,target=src \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
 xx-cargo build --locked --release --target-dir ./target && \
-cp ./target/$(xx-cargo --print-target-triple)/release/$APP_NAME /bin/server && \
+cp ./target/$(xx-cargo --print-target-triple)/release/axum_prototype /bin/server && \
 xx-verify /bin/server
 
 ################################################################################
