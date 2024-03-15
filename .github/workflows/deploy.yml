@@ -19,7 +19,7 @@ jobs:
       run: zip -r deploy.zip . -x '*.git*'
 
     - name: Sync to S3
-      run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/app-5b7f-240314_184729439595.zip
+      run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/glo-3013/app-5b7f-240314_184729439595.zip
 
     - name: Deploy to EB
       uses: einaregilsson/beanstalk-deploy@v22
