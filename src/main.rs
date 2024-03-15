@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, SocketAddr};
 
 use anyhow::Context;
 use axum::Router;
-use axum_prototype::setup::generate_router;
+use grue_vehicle_sharing::setup::generate_router;
 use clap::Parser;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -18,7 +18,7 @@ struct Args {
     /// TCP port number
     #[arg(short, long, default_value_t = 8080)]
     port: u16,
-    /// Specific lock UUIDv4
+    /// Specific lock UUID v4
     #[arg(short, long, default_value = None)]
     lock_uuid: Option<Uuid>,
 }
@@ -39,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     match args.lock_uuid {
         Some(uuid) => info!("Reset allowed with UUID: {}", uuid),
-        None => info!("Reset not allowed because no UUID supplied"),
+        None => info!("Reset always allowed because no UUID supplied"),
     }
 
     let custom_server = generate_router(args.lock_uuid);

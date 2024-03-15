@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{latest_grue_data::LatestGrueData, setup::AppState, team_id::TeamId};
+use crate::{app_state::AppState, latest_grue_data::LatestGrueData, team_id::TeamId};
 
 #[derive(Deserialize, Serialize)]
 pub struct GrueRequest {
@@ -52,10 +52,13 @@ pub async fn get_vehicle_data(State(app): State<Arc<AppState>>) -> Json<VehicleR
 
 pub async fn reset(
     State(app): State<Arc<AppState>>,
-    Json(request): Json<ResetRequest>,
+    maybe_request: Option<Json<ResetRequest>>,
 ) -> impl IntoResponse {
-    match app.reset_uuid(request.uuid).await {
-        Ok(uuid) => Json(uuid).into_response(),
+    match app
+        .reset_uuid(maybe_request.map(|request| request.uuid))
+        .await
+    {
+        Ok(()) => StatusCode::OK.into_response(),
         Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
 }
@@ -76,7 +79,8 @@ mod tests {
     const VALID_GRUE_ID: u8 = 1;
     const INVALID_GRUE_ID: u8 = TeamId::MAX_ID + 1;
     const ANY_NUMBER_OF_MERCHANDISE: u8 = 3;
-    const ANY_UUID: Uuid = uuid!("bb3b9185-f6a8-49eb-b5de-9fb50ff441e4");
+    const VALID_UUID: Uuid = uuid!("bb3b9185-f6a8-49eb-b5de-9fb50ff441e4");
+    const INVALID_UUID: Uuid = uuid!("ffffffff-ffff-ffff-ffff-ffffffffffff");
 
     fn given_test_server(maybe_uuid: Option<Uuid>) -> TestServer {
         TestServer::new_with_config(
@@ -148,13 +152,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn given_uuid_when_post_reset_then_ok_with_default() {
-        let server = given_test_server(Some(ANY_UUID));
+    async fn given_valid_uuid_when_post_reset_then_ok_with_default() {
+        let server = given_test_server(Some(VALID_UUID));
         let body_grue = GrueRequest {
             grue_id: VALID_GRUE_ID,
             number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
         };
-        let body_reset = ResetRequest { uuid: ANY_UUID };
+        let body_reset = ResetRequest { uuid: VALID_UUID };
 
         let _ = server.post(GRUE_PATH).json(&body_grue).await;
         let response1 = server.get(VEHICLE_PATH).await;
@@ -184,13 +188,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn given_no_uuid_when_post_reset_then_err() {
-        let server = given_test_server(None);
+    async fn given_invalid_uuid_when_post_reset_then_err() {
+        let server = given_test_server(Some(VALID_UUID));
         let body_grue = GrueRequest {
             grue_id: VALID_GRUE_ID,
             number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
         };
-        let body_reset = ResetRequest { uuid: ANY_UUID };
+        let body_reset = ResetRequest { uuid: INVALID_UUID };
 
         let _ = server.post(GRUE_PATH).json(&body_grue).await;
         let response1 = server.get(VEHICLE_PATH).await;
@@ -215,6 +219,41 @@ mod tests {
         response3.assert_json(&json!({
             "vehicle_data" : {
                 "team1": 3,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+    }
+
+    #[tokio::test]
+    async fn given_no_initial_uuid_when_post_reset_then_ok_with_default() {
+        let server = given_test_server(None);
+        let body_grue = GrueRequest {
+            grue_id: VALID_GRUE_ID,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
+        };
+
+        let _ = server.post(GRUE_PATH).json(&body_grue).await;
+        let response1 = server.get(VEHICLE_PATH).await;
+        let _ = server.post(RESET_PATH).await;
+        let response3 = server.get(VEHICLE_PATH).await;
+
+        response1.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 3,
+                "team2": 0,
+                "team3": 0,
+                "team4": 0,
+                "team5": 0,
+                "team6": 0
+            }
+        }));
+        response3.assert_json(&json!({
+            "vehicle_data" : {
+                "team1": 0,
                 "team2": 0,
                 "team3": 0,
                 "team4": 0,

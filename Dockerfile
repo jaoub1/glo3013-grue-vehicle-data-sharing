@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ################################################################################
 # xx is a helper for cross-compilation.
 # See https://github.com/tonistiigi/xx/ for more information.
@@ -72,3 +73,12 @@ EXPOSE 8080
 # What the container should run when it is started.
 CMD ["/bin/server"]
 
+=======
+FROM debian:12-slim
+
+COPY ./deploy_dir /deploy_dir
+WORKDIR /deploy_dir
+EXPOSE 8081
+
+CMD ["./executable.run", "--address", "0.0.0.0", "--port", "8081"]
+>>>>>>> 1b74c1c2a1232fc80d1d6c926e69836e7399ece8

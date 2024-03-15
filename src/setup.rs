@@ -1,6 +1,5 @@
-use std::{mem::swap, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::anyhow;
 use axum::{
     extract::MatchedPath,
     http::Request,
@@ -16,36 +15,8 @@ use tracing::{info_span, Level};
 use uuid::Uuid;
 
 use crate::{
-    constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH},
-    latest_grue_data::LatestGrueData,
-    routes,
+    app_state::AppState, constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH}, routes
 };
-
-pub struct AppState {
-    pub latest_grue_data: RwLock<LatestGrueData>,
-    pub lock_uuid: Option<RwLock<Uuid>>,
-}
-
-impl AppState {
-    pub async fn reset_uuid(&self, uuid: Uuid) -> anyhow::Result<()> {
-        match &self.lock_uuid {
-            Some(lock_uuid) => {
-                if uuid == *lock_uuid.read().await {
-                    let mut lock = self.latest_grue_data.write().await;
-
-                    swap(&mut *lock, &mut LatestGrueData::default());
-
-                    Ok(())
-                } else {
-                    Err(anyhow!("Error: The UUID supplied does not match the UUID supplied at server start."))
-                }
-            }
-            None => Err(anyhow!(
-                "Error: No reset allowed. No UUID supplied when the server started."
-            )),
-        }
-    }
-}
 
 /// Setup the Axum Server with routing
 pub fn generate_router(maybe_uuid: Option<Uuid>) -> Router {
