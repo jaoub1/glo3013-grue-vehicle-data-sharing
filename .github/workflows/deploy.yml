@@ -15,7 +15,7 @@ jobs:
       shell: bash
       run: |
         mkdir deploy_dir
-        cp ./target/release/grue-vehicle-sharing ./deploy_dir/executable.run
+        cp ./target/release/grue-vehicle-sharing ./executable.run
     
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
