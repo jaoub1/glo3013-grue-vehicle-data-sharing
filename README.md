@@ -10,7 +10,7 @@ Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l
 ### Website
 L'API hosté sur le Web et disponible 24/7 est la suivante :
 
-http://glo-3013-env.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com/
+http://production.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com
 
 
 ### Docker
