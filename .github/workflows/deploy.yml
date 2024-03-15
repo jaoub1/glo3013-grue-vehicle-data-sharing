@@ -36,7 +36,7 @@ jobs:
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: glo-3013 
         environment_name: glo-3013-env
-        version_label: app-5b7f-240314_184729439595
+        version_label: "ver-${{ github.sha }}"
         region: ca-central-1
         deployment_package: deploy.zip
 
