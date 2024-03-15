@@ -102,6 +102,12 @@ Fait le reset de toutes les données contenues sur le serveur. Cette route peut 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
 
 
+### GET /health
+Cette route permet à AWS d'effectuer du monoring sur la ressource. Il est donc très important de garder cette route active et fonctionnel. 
+
+- Response:
+    -  **200** OK
+
 
 ## Utilisation de l'API en Python
 Pour appeler l'[API](#api) du serveur, il faut réaliser un call HTTP avec la méthode POST ou GET sur les chemins mentionnés dans l'[API](#api).
