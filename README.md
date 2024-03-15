@@ -2,7 +2,7 @@
 
 Réseautique dans notre ville portuaire intelligente.
 
-Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l'inter-connectivité entre les grues, les véhicules avec un serveur centralisé qui peut être runné à partir de la ligne de commande, d'un Docker container ou accéder directement par le Web à l'adresse `http://{to be defined}/`. L'[API](#api) HTTP exposée par le serveur permet aux grues de publier ses informations les plus récentes sur le serveur pour le mettre à jour, et aux véhicules de recueillir toutes les informations courrantes pour le stockage des marchandises présentement sur le marché.
+Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l'inter-connectivité entre les grues, les véhicules avec un serveur centralisé qui peut être runné à partir de la ligne de commande, d'un Docker container ou accéder directement par le Web à [cette adresse](http://glo-3013-env.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com/). L'[API](#api) HTTP exposée par le serveur permet aux grues de publier ses informations les plus récentes sur le serveur pour le mettre à jour, et aux véhicules de recueillir toutes les informations courrantes pour le stockage des marchandises présentement sur le marché.
 
 
 
@@ -43,12 +43,14 @@ $ cargo doc --open # Open offline documentation
     - **200** OK
     - **400** BAD_REQUEST\
         String: (team number invalid, invalid JSON)
-    - **422** UNPROCESSABLE ENTITY
+    - **422** UNPROCESSABLE ENTITY\
         String: (invalid type, missing field)
 
 ### GET /vehicle
+Fetch toutes les données courrantes des marchandises délivrées par les grues.
+
 - Response:
-    -  200 OK:
+    -  **200** OK:
     ```json
     {
         "vehicle_data": {
@@ -63,6 +65,8 @@ $ cargo doc --open # Open offline documentation
     ```
 
 ### POST /reset
+Fait le reset de toutes les données contenues sur le serveur. Cette route peut être dans deux états différents : protégée (pour éviter les resets volontaires des compétiteurs pour brouiller les données), ou non protégée. Cette protection 
+
 - Body:
     ```json
     {
@@ -70,10 +74,10 @@ $ cargo doc --open # Open offline documentation
     }
     ```
 - Response:
-    -  200 OK
-    -  400 BAD_REQUEST\
+    -  **200** OK
+    -  **400** BAD_REQUEST\
         String (invalid uuid, reset not allowed)
-    - **422** UNPROCESSABLE ENTITY
+    - **422** UNPROCESSABLE ENTITY\
         String: (invalid type, missing field)
 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
