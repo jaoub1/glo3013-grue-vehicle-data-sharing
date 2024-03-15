@@ -40,6 +40,10 @@ pub async fn post_grue_data(
     }
 }
 
+pub async fn get_health() -> impl IntoResponse {
+    StatusCode::OK.into_response()
+}
+
 pub async fn get_vehicle_data(State(app): State<Arc<AppState>>) -> Json<VehicleResponse> {
     Json(VehicleResponse {
         vehicle_data: app.latest_grue_data.read().await.clone(),
@@ -63,7 +67,7 @@ mod tests {
     use uuid::uuid;
 
     use crate::{
-        constants::{GRUE_PATH, RESET_PATH, VEHICLE_PATH},
+        constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH},
         setup,
     };
 
@@ -94,6 +98,14 @@ mod tests {
         });
 
         let response = server.post(GRUE_PATH).json(&body).await;
+
+        response.assert_status(StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn given_app_running_when_get_health_then_ok(){
+        let server = given_test_server(None);
+        let response = server.get(HEALTH_PATH).await;
 
         response.assert_status(StatusCode::OK);
     }

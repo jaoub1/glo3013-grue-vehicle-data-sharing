@@ -16,7 +16,7 @@ use tracing::{info_span, Level};
 use uuid::Uuid;
 
 use crate::{
-    constants::{GRUE_PATH, RESET_PATH, VEHICLE_PATH},
+    constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH},
     latest_grue_data::LatestGrueData,
     routes,
 };
@@ -58,6 +58,7 @@ pub fn generate_router(maybe_uuid: Option<Uuid>) -> Router {
         Router::new()
             .route(GRUE_PATH, post(routes::post_grue_data))
             .route(VEHICLE_PATH, get(routes::get_vehicle_data))
+            .route(HEALTH_PATH, get(routes::get_health))
             .route(RESET_PATH, post(routes::reset))
             .layer(cors)
             .with_state(Arc::new(AppState {
