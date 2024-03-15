@@ -63,6 +63,10 @@ pub async fn reset(
     }
 }
 
+pub async fn version() -> impl IntoResponse {
+    env!("CARGO_PKG_VERSION")
+}
+
 #[cfg(test)]
 mod tests {
     use axum_test::{TestServer, TestServerConfig};
@@ -107,7 +111,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn given_app_running_when_get_health_then_ok(){
+    async fn given_app_running_when_get_health_then_ok() {
         let server = given_test_server(None);
         let response = server.get(HEALTH_PATH).await;
 

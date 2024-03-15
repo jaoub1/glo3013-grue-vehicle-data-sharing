@@ -15,7 +15,9 @@ use tracing::{info_span, Level};
 use uuid::Uuid;
 
 use crate::{
-    app_state::AppState, constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH}, routes
+    app_state::AppState,
+    constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH, VERSION_PATH},
+    routes,
 };
 
 /// Setup the Axum Server with routing
@@ -31,6 +33,7 @@ pub fn generate_router(maybe_uuid: Option<Uuid>) -> Router {
             .route(VEHICLE_PATH, get(routes::get_vehicle_data))
             .route(HEALTH_PATH, get(routes::get_health))
             .route(RESET_PATH, post(routes::reset))
+            .route(VERSION_PATH, get(routes::version))
             .layer(cors)
             .with_state(Arc::new(AppState {
                 latest_grue_data: Default::default(),

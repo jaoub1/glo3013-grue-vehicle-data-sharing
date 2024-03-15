@@ -2,8 +2,8 @@ use std::net::{Ipv4Addr, SocketAddr};
 
 use anyhow::Context;
 use axum::Router;
-use grue_vehicle_sharing::setup::generate_router;
 use clap::Parser;
+use grue_vehicle_sharing::setup::generate_router;
 use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
