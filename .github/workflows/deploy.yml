@@ -1,0 +1,47 @@
+name: Deploy
+
+on: 
+ push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    
+    - name: Build
+      run: cargo build --release
+
+    - name: Arrange
+      shell: bash
+      run: |
+        mkdir deploy_dir
+        cp ./target/release/grue-vehicle-sharing ./deploy_dir/executable.run
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ca-central-1
+    
+    - name: Generate deployment package
+      run: zip deploy.zip ./Dockerfile ./deploy_dir/executable.run
+
+    - name: Sync to S3
+      run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/glo-3013/app-5b7f-240314_184729439595.zip
+
+    - name: Create new ElasticBeanstalk Application Version
+      run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name glo-3013 \
+          --source-bundle S3Bucket="${{ secrets.BUCKET_NAME }}",S3Key="glo-3013/app-5b7f-240314_184729439595.zip" \
+          --version-label "ver-${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+    - name: Deploy new ElasticBeanstalk Application Version
+      run: aws elasticbeanstalk update-environment --environment-name production --version-label "ver-${{ github.sha }}"
+
