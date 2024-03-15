@@ -1,10 +1,7 @@
 /target
-<<<<<<< HEAD
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-=======
 /deploy_dir
->>>>>>> 1b74c1c2a1232fc80d1d6c926e69836e7399ece8

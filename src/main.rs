@@ -34,7 +34,6 @@ async fn main() -> anyhow::Result<()> {
         .try_init()
         .context("Failed setuping the logging system")?;
     info!("Hello World !");
-    info!("Sup gamer!");
 
     let args = Args::parse();
     match args.lock_uuid {
