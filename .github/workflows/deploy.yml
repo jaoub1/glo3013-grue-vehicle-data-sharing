@@ -21,14 +21,14 @@ jobs:
     - name: Sync to S3
       run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/glo-3013/app-5b7f-240314_184729439595.zip
 
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v22
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: glo-3013 
-        environment_name: glo-3013-env
-        version_label: app-5b7f-240314_184729439595.zip
-        region: ca-central-1
-        use_existing_version_if_available: true
+    - name: Create new ElasticBeanstalk Application Version
+      run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name glo-3013 \
+          --source-bundle S3Bucket="${{ secrets.BUCKET_NAME }}",S3Key="glo-3013/app-5b7f-240314_184729439595.zip" \
+          --version-label "ver-${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+    - name: Deploy new ElasticBeanstalk Application Version
+      run: aws elasticbeanstalk update-environment --environment-name glo-3013-env --version-label "ver-${{ github.sha }}
 
