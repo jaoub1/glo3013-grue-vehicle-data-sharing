@@ -7,7 +7,16 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
+    
+    - name: Build
+      run: cargo build --release
 
+    - name: Arrange
+      shell: bash
+      run: |
+        mkdir deploy_dir
+        cp ./target/release/grue-vehicle-sharing ./deploy_dir/executable.run
+    
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -16,7 +25,7 @@ jobs:
         aws-region: ca-central-1
     
     - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
+      run: zip deploy.zip ./Dockerfile ./deploy_dir/executable.run
 
     - name: Sync to S3
       run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/glo-3013/app-5b7f-240314_184729439595.zip
