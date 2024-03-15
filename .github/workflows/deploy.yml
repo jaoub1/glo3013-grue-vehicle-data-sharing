@@ -32,13 +32,13 @@ jobs:
       run: zip deploy.zip ./Dockerfile ./deploy_dir/executable.run
 
     - name: Sync to S3
-      run: aws s3 cp deploy.zip s3://${{ secrets.BUCKET_NAME }}/glo-3013/app-5b7f-240314_184729439595.zip
+      run: aws s3 cp deploy.zip s3://${{ secrets.AWS_BUCKET }}/glo-3013/app-5b7f-240314_184729439595.zip
 
     - name: Create new ElasticBeanstalk Application Version
       run: |
           aws elasticbeanstalk create-application-version \
           --application-name glo-3013 \
-          --source-bundle S3Bucket="${{ secrets.BUCKET_NAME }}",S3Key="glo-3013/app-5b7f-240314_184729439595.zip" \
+          --source-bundle S3Bucket="${{ secrets.AWS_BUCKET }}",S3Key="glo-3013/app-5b7f-240314_184729439595.zip" \
           --version-label "ver-${{ github.sha }}" \
           --description "commit-sha-${{ github.sha }}"
 
