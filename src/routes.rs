@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{latest_grue_data::LatestGrueData, setup::AppState, team_id::TeamId};
+use crate::{app_state::AppState, latest_grue_data::LatestGrueData, team_id::TeamId};
 
 #[derive(Deserialize, Serialize)]
 pub struct GrueRequest {
