@@ -5,6 +5,3 @@ WORKDIR /deploy_dir
 EXPOSE 8081
 
 CMD ["./executable.run", "--address", "0.0.0.0", "--port", "8081"]
-
-# docker build --tag 'grue-vehicle-sharing' .
-# docker run -it 'grue-vehicle-sharing'

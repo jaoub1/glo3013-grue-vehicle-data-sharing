@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, SocketAddr};
 
 use anyhow::Context;
 use axum::Router;
-use axum_prototype::setup::generate_router;
+use grue_vehicle_sharing::setup::generate_router;
 use clap::Parser;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -18,7 +18,7 @@ struct Args {
     /// TCP port number
     #[arg(short, long, default_value_t = 8080)]
     port: u16,
-    /// Specific lock UUIDv4
+    /// Specific lock UUID v4
     #[arg(short, long, default_value = None)]
     lock_uuid: Option<Uuid>,
 }

@@ -20,7 +20,7 @@ jobs:
       shell: bash
       run: |
         mkdir deploy_dir
-        cp ./target/release/axum_prototype ./deploy_dir/executable.run
+        cp ./target/release/grue-vehicle-sharing ./deploy_dir/executable.run
         strip ./deploy_dir/executable.run
         cp ./Dockerfile ./deploy_dir/
 
@@ -32,4 +32,4 @@ jobs:
         aws-region: us-east-1
     
     - name: Sync to S3
-      run: aws s3 sync ./deploy_dir/ s3://${{ secrets.AWS_BUCKET }} 
+      run: aws s3 sync ./deploy_dir/ s3://${{ secrets.AWS_BUCKET }}
