@@ -23,7 +23,7 @@ $ docker run -it 'grue-vehicle-sharing'
 
 
 ### Execution via le CLI
-L'api est fait en rust, il vous faudra donc installer rust pour l'executer localement : https://www.rust-lang.org/tools/install. Rust se chargera d'installer les dépendances lui même.
+L'api est fait en [Rust](https://www.rust-lang.org/) ; les dépendances s'installeront par elle-même.
 ```sh
 $ cargo run --release -- --address 127.0.0.1 --port 8081
 
@@ -51,7 +51,7 @@ $ cargo doc --open # Open offline documentation
 
 
 ## API
-### POST /grue
+### POST `/grue`
 Permet de d'envoyer le nombre de marchandises que possède votre grue.
 - Body:
     ```json
@@ -67,7 +67,7 @@ Permet de d'envoyer le nombre de marchandises que possède votre grue.
     - **422** UNPROCESSABLE ENTITY\
         String: (invalid type, missing field)
 
-### GET /vehicle
+### GET `/vehicle`
 Fetch toutes les données courrantes des marchandises délivrées par les grues.
 
 - Response:
@@ -85,10 +85,10 @@ Fetch toutes les données courrantes des marchandises délivrées par les grues.
     }
     ```
 
-### POST /reset
+### POST `/reset`
 Fait le reset de toutes les données contenues sur le serveur. Cette route peut être dans deux états différents : protégée (pour éviter les resets volontaires des compétiteurs pour brouiller les données), ou non protégée.
 
-- Body:
+- Body (optional):
     ```json
     {
         "uuid": "ffffffff-ffff-ffff-ffff-ffffffffffff"
@@ -103,23 +103,25 @@ Fait le reset de toutes les données contenues sur le serveur. Cette route peut 
 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
 
-### GET /health
-Cette route permet à AWS d'effectuer du monoring sur la ressource. Il est donc très important de garder cette route active et fonctionnel. 
+### `GET /health`
+Cette route permet à AWS d'effectuer du monoring sur la ressource. Il est donc très important de garder cette route active et fonctionnelle.
 
 - Response:
     -  **200** OK
 
-### GET /version
+### `GET /version`
 Permet d'obtenir la version du package qui run présentement. 
 
 - Response:
-    -  **200** OK
+    -  **200** OK\
+        Version in a string (e.g. "0.5.2")
+
 
 
 ## Utilisation de l'API en Python
 Pour appeler l'[API](#api) du serveur, il faut réaliser un call HTTP avec la méthode POST ou GET sur les chemins mentionnés dans l'[API](#api).
 
-> Note: Toues les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement; elle peut être remplacée par http://production.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com.
+> Note: Toutes les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement; elle peut être remplacée par celle citée [ici](#utilisation-avec-la-version-déployer-par-nos-soins-website).
 
 ### Grue
 ```python
