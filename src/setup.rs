@@ -27,23 +27,19 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub async fn reset_uuid(&self, uuid: Uuid) -> anyhow::Result<()> {
-        match &self.lock_uuid {
-            Some(lock_uuid) => {
-                if uuid == *lock_uuid.read().await {
-                    let mut lock = self.latest_grue_data.write().await;
-
-                    swap(&mut *lock, &mut LatestGrueData::default());
-
-                    Ok(())
-                } else {
-                    Err(anyhow!("Error: The UUID supplied does not match the UUID supplied at server start."))
-                }
+    pub async fn reset_uuid(&self, uuid: Option<Uuid>) -> anyhow::Result<()> {
+        if let Some(lock_uuid) = &self.lock_uuid {
+            if uuid != Some(*lock_uuid.read().await) {
+                return Err(anyhow!(
+                    "Error: The UUID supplied does not match the UUID supplied at server start."
+                ));
             }
-            None => Err(anyhow!(
-                "Error: No reset allowed. No UUID supplied when the server started."
-            )),
         }
+
+        let mut lock = self.latest_grue_data.write().await;
+        swap(&mut *lock, &mut LatestGrueData::default());
+
+        Ok(())
     }
 }
 

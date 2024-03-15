@@ -38,7 +38,7 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     match args.lock_uuid {
         Some(uuid) => info!("Reset allowed with UUID: {}", uuid),
-        None => info!("Reset not allowed because no UUID supplied"),
+        None => info!("Reset always allowed because no UUID supplied"),
     }
 
     let custom_server = generate_router(args.lock_uuid);
