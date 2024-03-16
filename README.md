@@ -103,13 +103,13 @@ Fait le reset de toutes les données contenues sur le serveur. Cette route peut 
 
 > Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
 
-### `GET /health`
+### GET `/health`
 Cette route permet à AWS d'effectuer du monoring sur la ressource. Il est donc très important de garder cette route active et fonctionnelle.
 
 - Response:
     -  **200** OK
 
-### `GET /version`
+### GET `/version`
 Permet d'obtenir la version du package qui run présentement. 
 
 - Response:
