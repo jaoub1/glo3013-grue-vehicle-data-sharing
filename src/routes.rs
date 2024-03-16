@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{app_state::AppState, latest_grue_data::LatestGrueData, team_id::TeamId};
+use crate::{app_state::AppState, latest_grue_data::LatestGrueData, loading_zone::LoadingZone};
 
 #[derive(Deserialize, Serialize)]
 pub struct GrueRequest {
@@ -28,12 +28,12 @@ pub async fn post_grue_data(
     State(app): State<Arc<AppState>>,
     request: Json<GrueRequest>,
 ) -> impl IntoResponse {
-    match TeamId::try_from(request.grue_id) {
-        Ok(team_id) => {
+    match LoadingZone::try_from(request.grue_id) {
+        Ok(zone_id) => {
             app.latest_grue_data
                 .write()
                 .await
-                .update_data(team_id, request.number_of_merchandise);
+                .update_data(zone_id, request.number_of_merchandise);
             StatusCode::OK.into_response()
         }
         Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
@@ -81,7 +81,7 @@ mod tests {
     use super::*;
 
     const VALID_GRUE_ID: u8 = 1;
-    const INVALID_GRUE_ID: u8 = TeamId::MAX_ID + 1;
+    const INVALID_GRUE_ID: u8 = LoadingZone::MAX_ID + 1;
     const ANY_NUMBER_OF_MERCHANDISE: u8 = 3;
     const VALID_UUID: Uuid = uuid!("bb3b9185-f6a8-49eb-b5de-9fb50ff441e4");
     const INVALID_UUID: Uuid = uuid!("ffffffff-ffff-ffff-ffff-ffffffffffff");
@@ -145,12 +145,47 @@ mod tests {
         response.assert_status(StatusCode::OK);
         response.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 3,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": ANY_NUMBER_OF_MERCHANDISE,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
+            }
+        }));
+    }
+
+    #[tokio::test]
+    async fn given_new_grue_data_when_get_vehicle_data_then_ok_with_new_data() {
+        let server = given_test_server(None);
+        let body = GrueRequest {
+            grue_id: 42,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
+        };
+
+        let response1 = server.get(VEHICLE_PATH).json(&body).await;
+        let _ = server.post(GRUE_PATH).json(&body).await;
+        let response2 = server.get(VEHICLE_PATH).json(&body).await;
+
+        response1.assert_json(&json!({
+            "vehicle_data" : {
+                "zone1": 0,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0,
+            }
+        }));
+        response2.assert_json(&json!({
+            "vehicle_data" : {
+                "zone1": 0,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0,
+                "zone42": ANY_NUMBER_OF_MERCHANDISE,
             }
         }));
     }
@@ -171,22 +206,22 @@ mod tests {
 
         response1.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 3,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": ANY_NUMBER_OF_MERCHANDISE,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
         response2.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 0,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": 0,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
     }
@@ -212,22 +247,22 @@ mod tests {
         response2.assert_status(StatusCode::BAD_REQUEST);
         response1.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 3,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": ANY_NUMBER_OF_MERCHANDISE,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
         response3.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 3,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": ANY_NUMBER_OF_MERCHANDISE,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
     }
@@ -247,22 +282,22 @@ mod tests {
 
         response1.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 3,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": ANY_NUMBER_OF_MERCHANDISE,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
         response3.assert_json(&json!({
             "vehicle_data" : {
-                "team1": 0,
-                "team2": 0,
-                "team3": 0,
-                "team4": 0,
-                "team5": 0,
-                "team6": 0
+                "zone1": 0,
+                "zone2": 0,
+                "zone3": 0,
+                "zone4": 0,
+                "zone5": 0,
+                "zone6": 0
             }
         }));
     }
