@@ -12,11 +12,13 @@ Le lien de l'API hosté sur le Web et disponible 24/7 est le suivant :
 
 http://production.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com
 
+> Note: C'est le port `80` (HTTP) qui est utilisé pour intéragir avec le serveur.
+
 
 ### Execution dans un Docker
 ```sh
-$ docker build --tag 'grue-vehicle-sharing' .
-$ docker run -it 'grue-vehicle-sharing'
+$ docker build --tag 'grue-vehicle-sharing' -f Dockerfile_rust .
+$ docker run --network=host -it 'grue-vehicle-sharing'
 ```
 
 >Note: You must have [Docker installed](https://docs.docker.com/engine/install/) first.
@@ -87,6 +89,7 @@ Fetch toutes les données courrantes des marchandises délivrées par les grues.
     ```
 
 > Note: La range valide pour les zones de changements est entre `0` et `99`. Si une zone n'est pas listée, alors aucune marchandise n'a été reportée pour celle-ci.
+
 > Note: Par défaut, les zones 1 à 6 sont toujours setter à 0.
 
 ### POST `/reset`
@@ -125,26 +128,30 @@ Permet d'obtenir la version du package qui run présentement.
 ## Utilisation de l'API en Python
 Pour appeler l'[API](#api) du serveur, il faut réaliser un call HTTP avec la méthode POST ou GET sur les chemins mentionnés dans l'[API](#api).
 
-> Note: Toutes les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement; elle peut être remplacée par celle citée [ici](#utilisation-avec-la-version-déployer-par-nos-soins-website).
+> Note: Tous les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement; elle peut être remplacée par celle citée [ici](#utilisation-avec-la-version-déployer-par-nos-soins-website).
 
 ### Grue
 ```python
+import requests
+
 body = { "grue_id": 4, "number_of_merchandise": 42 }
 response = requests.post("http://127.0.0.1:8081/grue", json = body)
 
-if response.status_code is 200:
+if response.status_code == 200:
     pass # good !
-else
+else:
     pass # handle error
 ```
 
 ### Véhicule
 ```python
+import requests
+
 response = requests.get("http://127.0.0.1:8081/vehicle")
 
-if response.status_code is 200:
+if response.status_code == 200:
     print(response.text) # good !
-else
+else:
     pass # handle error
 ```
 

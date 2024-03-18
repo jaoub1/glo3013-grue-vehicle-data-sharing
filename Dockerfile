@@ -1,3 +1,6 @@
+# This is the Continuous Deployment Docker container.
+# Use the "Dockerfile_rust" file instead to compile and run the program.
+
 FROM debian:12-slim
 
 COPY ./deploy_dir /deploy_dir

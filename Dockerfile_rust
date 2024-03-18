@@ -1,0 +1,8 @@
+# This is Compile Rust Docker container.
+
+FROM rust:1.75-slim
+
+COPY . .
+RUN cargo build --release
+
+CMD ["./target/release/grue-vehicle-sharing", "--address", "0.0.0.0", "--port", "8081"]
