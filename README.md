@@ -6,26 +6,53 @@ Ce répertoire présente la proposition de l'équipe 7 et 10 pour implémenter l
 
 
 
-## Usage
-### Utilisation avec la version déployer par nos soins (Website)
-Le lien de l'API hosté sur le Web et disponible 24/7 est le suivant :
+## Content
+[Installation](#installation)\
+[Usage](#usage)\
+[API](#api)\
+[Exemple d'utilisation de l'API en Python](#exemple-dutilisation-de-lapi-en-python)
 
-http://production.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com
+
+
+## Installation
+Pour utiliser l'API du serveur HTTP de la manière présentée dans les [exemples](#exemple-dutilisation-de-lapi-en-python) ci-dessous, vous devez installer les *minimum requirements* suivants :
+
+- [Python +3.8](https://www.python.org/downloads/)
+- [Docker +24.0](https://docs.docker.com/engine/install/) (optional) :
+    Permet d'utiliser le serveur sans devoir setup l'environnement sur un ordinateur.
+- [Rust +1.76](https://www.rust-lang.org/tools/install) (optional) :
+    Permet d'installer les toolchains pour compiler et faire plusieurs commandes utiles pour le développement en [Rust](https://www.rust-lang.org/).
+
+> Note: Tous ces programmes peuvent être installés sur GNU+Linux, MacOS et Windows.
+
+
+
+## Usage
+Il existe différentes manières d'utiliser le serveur HTTP :
+- [Version Web sur Amazon Web Services (AWS)](#version-web-sur-amazon-web-services-aws)
+- [Exécution dans Docker](#exécution-dans-un-docker)
+- [Exécution via le CLI](#exécution-via-cargo)
+
+### Version Web sur Amazon Web Services (AWS)
+Le lien de l'API hosté sur le Web et disponible 24/7 est le suivant :
+```
+http://production.eba-fkhzhyn3.ca-central-1.elasticbeanstalk.com:80/
+```
 
 > Note: C'est le port `80` (HTTP) qui est utilisé pour intéragir avec le serveur.
 
 
-### Execution dans un Docker
+### Exécution dans un Docker
 ```sh
 $ docker build --tag 'grue-vehicle-sharing' -f Dockerfile_rust .
 $ docker run --network=host -it 'grue-vehicle-sharing'
 ```
 
->Note: You must have [Docker installed](https://docs.docker.com/engine/install/) first.
+>Note: You must have [Docker installed](#installation) first.
 
 
-### Execution via le CLI
-L'api est fait en [Rust](https://www.rust-lang.org/) ; les dépendances s'installeront par elle-même.
+### Exécution via Cargo
+L'API est écrite en [Rust](#installation) ; on peut donc l'exécuter directement avec `cargo` et les dépendances se compileront par elles-mêmes.
 ```sh
 $ cargo run --release -- --address 127.0.0.1 --port 8081
 
@@ -53,6 +80,8 @@ $ cargo doc --open # Open offline documentation
 
 
 ## API
+> Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
+
 ### POST `/grue`
 Permet de d'envoyer le nombre de marchandises que possède votre grue.
 - Body:
@@ -90,7 +119,7 @@ Fetch toutes les données courrantes des marchandises délivrées par les grues.
 
 > Note: La range valide pour les zones de changements est entre `0` et `99`. Si une zone n'est pas listée, alors aucune marchandise n'a été reportée pour celle-ci.
 
-> Note: Par défaut, les zones 1 à 6 sont toujours setter à 0.
+> Note: Par défaut, les zones 1 à 6 sont toujours setter à 0, et les autres sont absentes.
 
 ### POST `/reset`
 Fait le reset de toutes les données contenues sur le serveur. Cette route peut être dans deux états différents : protégée (pour éviter les resets volontaires des compétiteurs pour brouiller les données), ou non protégée.
@@ -108,8 +137,6 @@ Fait le reset de toutes les données contenues sur le serveur. Cette route peut 
     - **422** UNPROCESSABLE ENTITY\
         String: (invalid type, missing field)
 
-> Note: Tous les chiffres sont des "JSON numbers" (unsigned integer of 8 bits)
-
 ### GET `/health`
 Cette route permet à AWS d'effectuer du monoring sur la ressource. Il est donc très important de garder cette route active et fonctionnelle.
 
@@ -125,10 +152,10 @@ Permet d'obtenir la version du package qui run présentement.
 
 
 
-## Utilisation de l'API en Python
+## Exemple d'utilisation de l'API en Python
 Pour appeler l'[API](#api) du serveur, il faut réaliser un call HTTP avec la méthode POST ou GET sur les chemins mentionnés dans l'[API](#api).
 
-> Note: Tous les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement; elle peut être remplacée par celle citée [ici](#utilisation-avec-la-version-déployer-par-nos-soins-website).
+> Note: Tous les exemples utilisent l'adresse `127.0.0.1:8081` pour travailler localement, mais elle peut être remplacée par une autre, telle que celle sur AWS [ici](#version-web-sur-amazon-web-services-aws).
 
 ### Grue
 ```python
