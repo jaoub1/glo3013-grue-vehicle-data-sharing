@@ -30,7 +30,7 @@ impl AppState {
 
     pub async fn get_specific_grue_date(&self, zone: LoadingZone) -> anyhow::Result<u8> {
         let data = self.latest_grue_data.read().await.clone();
-        match data.get_marchandise(zone) {
+        match data.get_merchandise(zone) {
             Some(x) => Ok(*x),
             None => Err(anyhow!("Error: No data found for zone {}", zone)),
         }
