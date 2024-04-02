@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::extract::Path;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -16,6 +17,12 @@ pub struct GrueRequest {
 pub struct VehicleResponse {
     #[allow(dead_code)]
     vehicle_data: LatestGrueData,
+}
+
+#[derive(Serialize, Debug)]
+pub struct GrueResponse{
+    #[allow(dead_code)]
+    number_of_merchandise: u8,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -48,6 +55,15 @@ pub async fn get_vehicle_data(State(app): State<Arc<AppState>>) -> Json<VehicleR
     Json(VehicleResponse {
         vehicle_data: app.latest_grue_data.read().await.clone(),
     })
+}
+
+pub async fn get_grue_data(Path(id): Path<u8>, State(app): State<Arc<AppState>>) -> impl IntoResponse {
+    match app.get_specific_grue_date(id).await {
+        Ok(number_of_merchandise) => Json(GrueResponse {
+            number_of_merchandise,
+        }).into_response(),
+        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+    }
 }
 
 pub async fn reset(
@@ -300,5 +316,23 @@ mod tests {
                 "zone6": 0
             }
         }));
+    }
+
+    #[tokio::test]
+    async fn given_grue_id_when_getting_her_data_then_return_data() {
+        let server = given_test_server(None);
+        let body_grue = GrueRequest {
+            grue_id: VALID_GRUE_ID,
+            number_of_merchandise: ANY_NUMBER_OF_MERCHANDISE,
+        };
+
+        let mut path = String::from(GRUE_PATH);
+        path.push('/');
+        path.push_str(&*VALID_GRUE_ID.to_string());
+
+        let _ = server.post(GRUE_PATH).json(&body_grue).await;
+        let response = server.get(&path).await;
+        response.assert_json(&json!({"number_of_merchandise" : ANY_NUMBER_OF_MERCHANDISE}));
+
     }
 }
