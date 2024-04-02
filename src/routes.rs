@@ -333,6 +333,16 @@ mod tests {
         let _ = server.post(GRUE_PATH).json(&body_grue).await;
         let response = server.get(&path).await;
         response.assert_json(&json!({"number_of_merchandise" : ANY_NUMBER_OF_MERCHANDISE}));
+    }
 
+    #[tokio::test]
+    async fn given_not_an_id_when_retrieving_data_then_have_400() {
+        let server = given_test_server(None);
+        let mut path = String::from(GRUE_PATH);
+        path.push_str("/not_an_id");
+
+        let response = server.get(&path).expect_failure().await;
+
+        response.assert_status_bad_request();
     }
 }

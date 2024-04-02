@@ -117,6 +117,17 @@ Fetch toutes les données courrantes des marchandises délivrées par les grues.
     }
     ```
 
+### GET `/grue/:id`
+Fetch les données d'une grue.
+
+- Response:
+    -  **200** OK:
+    ```json
+    {
+        "number_of_merchandise": 42
+    }
+    ```
+
 > Note: La range valide pour les zones de changements est entre `0` et `99`. Si une zone n'est pas listée, alors aucune marchandise n'a été reportée pour celle-ci.
 
 > Note: Par défaut, les zones 1 à 6 sont toujours setter à 0, et les autres sont absentes.
