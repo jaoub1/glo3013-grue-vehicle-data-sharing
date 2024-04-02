@@ -14,6 +14,7 @@ use tower_http::{
 use tracing::{info_span, Level};
 use uuid::Uuid;
 
+use crate::constants::GRUE_DATA_PATH;
 use crate::{
     app_state::AppState,
     constants::{GRUE_PATH, HEALTH_PATH, RESET_PATH, VEHICLE_PATH, VERSION_PATH},
@@ -34,6 +35,7 @@ pub fn generate_router(maybe_uuid: Option<Uuid>) -> Router {
             .route(HEALTH_PATH, get(routes::get_health))
             .route(RESET_PATH, post(routes::reset))
             .route(VERSION_PATH, get(routes::version))
+            .route(GRUE_DATA_PATH, get(routes::get_grue_data))
             .layer(cors)
             .with_state(Arc::new(AppState {
                 latest_grue_data: Default::default(),

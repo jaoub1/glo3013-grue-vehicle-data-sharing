@@ -5,3 +5,5 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 /deploy_dir
+
+.idea/

@@ -5,6 +5,7 @@ use tokio::sync::RwLock;
 use uuid::Uuid;
 
 use crate::latest_grue_data::LatestGrueData;
+use crate::loading_zone::LoadingZone;
 
 pub struct AppState {
     pub latest_grue_data: RwLock<LatestGrueData>,
@@ -25,5 +26,16 @@ impl AppState {
         swap(&mut *lock, &mut LatestGrueData::default());
 
         Ok(())
+    }
+
+    pub async fn get_specific_grue_date(&self, zone: LoadingZone) -> anyhow::Result<u8> {
+        let data = self.latest_grue_data.read().await.clone();
+        match data.get_merchandise(&zone) {
+            Some(x) => Ok(*x),
+            None => Err(anyhow!(
+                "Error: No data found for zone {}",
+                zone.to_string()
+            )),
+        }
     }
 }
