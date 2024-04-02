@@ -117,6 +117,10 @@ Fetch toutes les données courrantes des marchandises délivrées par les grues.
     }
     ```
 
+> Note: La range valide pour les zones de changements est entre `0` et `99`. Si une zone n'est pas listée, alors aucune marchandise n'a été reportée pour celle-ci.
+
+> Note: Par défaut, les zones 1 à 6 sont toujours setter à 0, et les autres sont absentes.
+> 
 ### GET `/grue/:id`
 Fetch les données d'une grue.
 
@@ -127,10 +131,6 @@ Fetch les données d'une grue.
         "number_of_merchandise": 42
     }
     ```
-
-> Note: La range valide pour les zones de changements est entre `0` et `99`. Si une zone n'est pas listée, alors aucune marchandise n'a été reportée pour celle-ci.
-
-> Note: Par défaut, les zones 1 à 6 sont toujours setter à 0, et les autres sont absentes.
 
 ### POST `/reset`
 Fait le reset de toutes les données contenues sur le serveur. Cette route peut être dans deux états différents : protégée (pour éviter les resets volontaires des compétiteurs pour brouiller les données), ou non protégée.

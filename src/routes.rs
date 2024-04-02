@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use axum::extract::Path;
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -20,7 +20,7 @@ pub struct VehicleResponse {
 }
 
 #[derive(Serialize, Debug)]
-pub struct GrueResponse{
+pub struct GrueResponse {
     #[allow(dead_code)]
     number_of_merchandise: u8,
 }
@@ -57,12 +57,25 @@ pub async fn get_vehicle_data(State(app): State<Arc<AppState>>) -> Json<VehicleR
     })
 }
 
-pub async fn get_grue_data(Path(id): Path<u8>, State(app): State<Arc<AppState>>) -> impl IntoResponse {
-    match app.get_specific_grue_date(id).await {
-        Ok(number_of_merchandise) => Json(GrueResponse {
-            number_of_merchandise,
-        }).into_response(),
-        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+pub async fn get_grue_data(
+    Path(id): Path<u8>,
+    State(app): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let zone = LoadingZone::try_from(id);
+
+    match zone {
+        Ok(zone) => match app.get_specific_grue_date(zone).await {
+            Ok(number_of_merchandise) => Json(GrueResponse {
+                number_of_merchandise,
+            })
+            .into_response(),
+            Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+        },
+        Err(_) => (
+            StatusCode::BAD_REQUEST,
+            "Error: Not a valid zone id".to_string(),
+        )
+            .into_response(),
     }
 }
 

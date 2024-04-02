@@ -15,8 +15,8 @@ impl LatestGrueData {
             .or_insert(number_of_merchandise);
     }
 
-    pub fn get_data(&self, zone_id: u8) -> Option<&u8> {
-        self.0.get(&LoadingZone(zone_id))
+    pub fn get_marchandise(&self, zone: LoadingZone) -> Option<&u8> {
+        self.0.get(&zone)
     }
 }
 

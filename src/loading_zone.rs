@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use serde::{Serialize, Serializer};
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct LoadingZone(pub u8);
+pub struct LoadingZone(u8);
 
 impl LoadingZone {
     pub const MIN_ID: u8 = 0;
